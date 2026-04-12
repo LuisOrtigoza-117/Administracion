@@ -34,6 +34,7 @@
                 <div class="col-md-6 mb-3">
                     <label for="role" class="form-label">Rol</label>
                     <select class="form-select" id="role" name="role" required onchange="toggleStudentFields()">
+                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrador</option>
                         <option value="teacher" {{ $user->role === 'teacher' ? 'selected' : '' }}>Profesor</option>
                         <option value="student" {{ $user->role === 'student' ? 'selected' : '' }}>Estudiante</option>
                     </select>

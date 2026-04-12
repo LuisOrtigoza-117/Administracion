@@ -10,7 +10,19 @@
     </div>
 </div>
 
+@if(isset($isTeacherWithGroups) && !$isTeacherWithGroups)
 <div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h4><i class="fas fa-info-circle"></i> Bienvenido</h4>
+            <p class="mb-0">Aún no tienes grupos asignados. Contacta con un administrador para que te asigne grupos y puedas comenzar a ver tus estadísticas.</p>
+        </div>
+    </div>
+</div>
+@endif
+
+<div class="row mb-4">
+    @if(!isset($isTeacherWithGroups) || $isTeacherWithGroups)
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
@@ -20,6 +32,9 @@
             </div>
         </div>
     </div>
+    @endif
+    
+    @if(!isset($isTeacherWithGroups) || $isTeacherWithGroups)
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
@@ -29,6 +44,8 @@
             </div>
         </div>
     </div>
+    @endif
+    
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
@@ -49,6 +66,7 @@
     </div>
 </div>
 
+@if(!isset($isTeacherWithGroups) || $isTeacherWithGroups)
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
@@ -78,6 +96,7 @@
         </div>
     </div>
 </div>
+@endif
 
 @if($recentReports->count() > 0)
 <div class="row">
@@ -101,10 +120,10 @@
                         <tbody>
                             @foreach($recentReports as $report)
                             <tr>
-                                <td>{{ $report->computer->pc_number }}</td>
+                                <td>{{ $report->computer->pc_number ?? 'N/A' }}</td>
                                 <td>{{ Str::limit($report->description, 50) }}</td>
                                 <td>{{ $report->reported_by }}</td>
-                                <td>{{ $report->report_date->format('d/m/Y') }}</td>
+                                <td>{{ $report->report_date ? $report->report_date->format('d/m/Y') : 'N/A' }}</td>
                                 <td>
                                     @if($report->status == 'pending')
                                         <span class="badge bg-warning">Pendiente</span>

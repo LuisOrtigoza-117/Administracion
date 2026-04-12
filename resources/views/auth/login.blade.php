@@ -56,6 +56,32 @@
         .btn-login:hover {
             background-color: #2980b9;
         }
+        .user-type-tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .user-type-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .user-type-tab.active {
+            color: var(--secondary);
+            border-bottom: 2px solid var(--secondary);
+            margin-bottom: -2px;
+        }
+        .user-type-tab:hover {
+            color: var(--secondary);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -78,8 +104,18 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login') }}">
+                <div class="user-type-tabs">
+                    <button type="button" class="user-type-tab active" data-tab="student">
+                        <i class="fas fa-user-graduate"></i> Alumno
+                    </button>
+                    <button type="button" class="user-type-tab" data-tab="teacher">
+                        <i class="fas fa-chalkboard-teacher"></i> Maestro
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('login') }}" id="login-form" class="tab-content active" data-tab-content="student">
                     @csrf
+                    <input type="hidden" name="user_type" value="student">
                     <div class="mb-3">
                         <label for="email" class="form-label">Correo Electrónico</label>
                         <div class="input-group">
@@ -99,16 +135,78 @@
                         <label class="form-check-label" for="remember">Recordarme</label>
                     </div>
                     <button type="submit" class="btn btn-primary btn-login w-100">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión como Alumno
                     </button>
                     <div class="text-center mt-3">
                         <a href="{{ route('password.request') }}" class="text-decoration-none">
                             <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
                         </a>
                     </div>
+                    <hr>
+                    <div class="text-center">
+                        <p class="text-muted mb-2">¿No tienes cuenta?</p>
+                        <a href="{{ route('register', 'student') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-user-plus"></i> Registrarse como Alumno
+                        </a>
+                    </div>
+                </form>
+
+                <form method="POST" action="{{ route('login') }}" id="login-form-teacher" class="tab-content" data-tab-content="teacher">
+                    @csrf
+                    <input type="hidden" name="user_type" value="teacher">
+                    <div class="mb-3">
+                        <label for="email_teacher" class="form-label">Correo Electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email_teacher" name="email" value="{{ old('email') }}" required autofocus>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_teacher" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password_teacher" name="password" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_teacher" name="remember">
+                        <label class="form-check-label" for="remember_teacher">Recordarme</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-login w-100">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión como Maestro
+                    </button>
+                    <div class="text-center mt-3">
+                        <a href="{{ route('password.request') }}" class="text-decoration-none">
+                            <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <p class="text-muted mb-2">¿No tienes cuenta?</p>
+                        <a href="{{ route('register', 'teacher') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-user-plus"></i> Registrarse como Maestro
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
+    <script>
+        document.querySelectorAll('.user-type-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                document.querySelectorAll('.user-type-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                    if (content.dataset.tabContent === tabName) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

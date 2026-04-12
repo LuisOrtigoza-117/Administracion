@@ -33,7 +33,8 @@
                 <div class="col-md-6 mb-3">
                     <label for="role" class="form-label">Rol</label>
                     <select class="form-select" id="role" name="role" required onchange="toggleStudentFields()">
-                        <option value="teacher">Profesor</option>
+                        <option value="admin">Administrador</option>
+                        <option value="teacher" selected>Profesor</option>
                         <option value="student">Estudiante</option>
                     </select>
                 </div>

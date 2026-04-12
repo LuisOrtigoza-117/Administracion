@@ -14,9 +14,10 @@ class UserController extends Controller
 {
     public function index()
     {
+        $admins = User::where('role', 'admin')->orderBy('name')->get();
         $teachers = User::where('role', 'teacher')->orderBy('name')->get();
         $students = User::where('role', 'student')->with('student.group')->orderBy('name')->get();
-        return view('users.index', compact('teachers', 'students'));
+        return view('users.index', compact('admins', 'teachers', 'students'));
     }
 
     public function create()
@@ -31,7 +32,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:teacher,student',
+            'role' => 'required|in:admin,teacher,student',
             'student_number' => 'nullable|string',
             'lastname' => 'nullable|string',
             'group_id' => 'nullable|exists:groups,id',
@@ -74,7 +75,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:6',
-            'role' => 'required|in:teacher,student',
+            'role' => 'required|in:admin,teacher,student',
             'student_number' => 'nullable|string',
             'lastname' => 'nullable|string',
             'group_id' => 'nullable|exists:groups,id',

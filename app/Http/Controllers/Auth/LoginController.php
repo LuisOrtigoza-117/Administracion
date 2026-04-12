@@ -20,10 +20,26 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        $userType = $request->input('user_type', 'student');
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
             $user = Auth::user();
+            
+            if ($userType === 'student' && !$user->isStudent()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Este usuario no es un estudiante.',
+                ])->onlyInput('email');
+            }
+            
+            if ($userType === 'teacher' && $user->isStudent()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Este usuario no es un maestro.',
+                ])->onlyInput('email');
+            }
             
             if ($user->isStudent()) {
                 return redirect()->route('student.dashboard');

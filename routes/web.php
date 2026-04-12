@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\GroupController;
@@ -20,6 +21,9 @@ use App\Http\Controllers\RecessController;
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login.form');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/register/{type}', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register/{type}', [RegisterController::class, 'register'])->name('register');
 
 // Password Reset Routes
 Route::get('password/request', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');

@@ -15,13 +15,15 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+        $isTeacherWithGroups = false;
         $teacherGroupIds = [];
+        
         if ($user && $user->isTeacher()) {
             $teacherGroupIds = Group::where('teacher_id', $user->id)->pluck('id')->toArray();
+            $isTeacherWithGroups = !empty($teacherGroupIds);
         }
         
-        if ($user && $user->isTeacher() && !empty($teacherGroupIds)) {
+        if ($user && $user->isTeacher() && $isTeacherWithGroups) {
             $totalGroups = count($teacherGroupIds);
             $totalStudents = Student::whereIn('group_id', $teacherGroupIds)->count();
             $totalComputers = Computer::count();
@@ -38,6 +40,16 @@ class DashboardController extends Controller
                 ->orderBy('report_date', 'desc')
                 ->limit(5)
                 ->get();
+        } elseif ($user && $user->isTeacher() && !$isTeacherWithGroups) {
+            $totalGroups = 0;
+            $totalStudents = 0;
+            $totalComputers = Computer::count();
+            $damagedComputers = Computer::where('status', 'damaged')->count();
+            $today = Carbon::today()->toDateString();
+            $todayAttendances = 0;
+            $presentToday = 0;
+            $pendingTasks = 0;
+            $recentReports = collect([]);
         } else {
             $totalGroups = Group::count();
             $totalStudents = Student::count();
@@ -65,7 +77,8 @@ class DashboardController extends Controller
             'todayAttendances',
             'presentToday',
             'pendingTasks',
-            'recentReports'
+            'recentReports',
+            'isTeacherWithGroups'
         ));
     }
 }
