@@ -165,7 +165,7 @@
                                         <i class="fas fa-star"></i> Calificar
                                     </button>
                                     <div class="modal fade" id="gradeModal{{ $submission->id }}" tabindex="-1">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">Calificar: {{ $submission->student->name }}</h5>
@@ -174,18 +174,62 @@
                                                 <form action="{{ route('tasks.submissions.grade', $submission) }}" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
+                                                        @if($submission->content || $submission->file_path)
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold">Entrega del estudiante:</label>
+                                                                @if($submission->content)
+                                                                    <div class="p-3 bg-light rounded mb-3">
+                                                                        <p class="mb-0">{{ $submission->content }}</p>
+                                                                    </div>
+                                                                @endif
+                                                                @if($submission->file_path)
+                                                                    @php
+                                                                        $fileUrl = asset('storage/' . $submission->file_path);
+                                                                        $fileExtension = strtolower(pathinfo($submission->file_path, PATHINFO_EXTENSION));
+                                                                        $isImage = in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+                                                                        $isPdf = $fileExtension === 'pdf';
+                                                                    @endphp
+                                                                    <div class="border rounded p-3">
+                                                                        <div class="mb-2">
+                                                                            <i class="fas fa-file me-2"></i>
+                                                                            <strong>Archivo:</strong> {{ basename($submission->file_path) }}
+                                                                        </div>
+                                                                        @if($isImage)
+                                                                            <div class="text-center mb-3">
+                                                                                <img src="{{ $fileUrl }}" alt="Archivo" class="img-fluid rounded" style="max-height: 300px; cursor: pointer;" onclick="window.open('{{ $fileUrl }}', '_blank')">
+                                                                                <p class="text-muted small mb-0">Clic en la imagen para ver en grande</p>
+                                                                            </div>
+                                                                        @elseif($isPdf)
+                                                                            <iframe src="{{ $fileUrl }}" width="100%" height="300px" class="rounded border mb-2"></iframe>
+                                                                        @endif
+                                                                        <a href="{{ $fileUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="fas fa-external-link-alt"></i> Ver archivo completo
+                                                                        </a>
+                                                                        <a href="{{ $fileUrl }}" download class="btn btn-sm btn-success">
+                                                                            <i class="fas fa-download"></i> Descargar
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                        <hr>
                                                         <div class="mb-3">
                                                             <label class="form-label">Calificación</label>
-                                                            <input type="number" class="form-control" name="grade" min="0" max="{{ $task->max_points }}" step="0.5" value="{{ $submission->grade ?? '' }}" required>
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" name="grade" min="0" max="{{ $task->max_points }}" step="0.5" value="{{ $submission->grade ?? '' }}" required>
+                                                                <span class="input-group-text">/ {{ $task->max_points }}</span>
+                                                            </div>
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label">Retroalimentación</label>
-                                                            <textarea class="form-control" name="feedback" rows="3">{{ $submission->feedback ?? '' }}</textarea>
+                                                            <textarea class="form-control" name="feedback" rows="3" placeholder="Escribe comentarios para el estudiante...">{{ $submission->feedback ?? '' }}</textarea>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-primary">Guardar</button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-save"></i> Guardar calificación
+                                                        </button>
                                                     </div>
                                                 </form>
                                             </div>

@@ -65,7 +65,7 @@ class StudentController extends Controller
                 ->with('success', 'Estudiante "' . $student->name . ' ' . $student->lastname . '" registrado en el grupo "' . $group->name . '" exitosamente');
         } catch (\Exception $e) {
             \Log::error('Error creating student: ' . $e->getMessage());
-            return back()->with('error', 'Error al guardar: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Error al guardar el estudiante. Por favor intenta de nuevo.')->withInput();
         }
     }
 

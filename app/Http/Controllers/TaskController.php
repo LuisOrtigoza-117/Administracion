@@ -57,6 +57,8 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'group_ids' => 'required|array|min:1',
             'group_ids.*' => 'required|exists:groups,id',
@@ -66,6 +68,15 @@ class TaskController extends Controller
             'max_points' => 'required|numeric|min:0',
             'attachments.*' => 'nullable|file|max:20480',
         ]);
+
+        if ($user && $user->isTeacher()) {
+            $teacherGroupIds = Group::where('teacher_id', $user->id)->pluck('id')->toArray();
+            foreach ($validated['group_ids'] as $groupId) {
+                if (!in_array($groupId, $teacherGroupIds)) {
+                    return back()->with('error', 'No tienes permiso para asignar tareas a ese grupo.')->withInput();
+                }
+            }
+        }
 
         $attachments = [];
         
@@ -179,6 +190,12 @@ class TaskController extends Controller
 
     public function grade(Request $request, TaskSubmission $submission)
     {
+        $user = Auth::user();
+        
+        if (!$user || (!$user->isTeacher() && $user->role !== 'admin')) {
+            abort(403, 'No tienes permiso para calificar tareas.');
+        }
+
         $validated = $request->validate([
             'grade' => 'required|numeric|min:0',
             'feedback' => 'nullable|string',

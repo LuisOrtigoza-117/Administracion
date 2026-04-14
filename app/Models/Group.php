@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Collection;
 
 class Group extends Model
 {
@@ -15,9 +16,9 @@ class Group extends Model
         return $this->hasMany(Student::class);
     }
 
-    public function tasks(): HasMany
+    public function getTasksAttribute(): Collection
     {
-        return $this->hasMany(Task::class);
+        return Task::whereJsonContains('group_ids', $this->id)->get();
     }
 
     public function attendances(): HasMany

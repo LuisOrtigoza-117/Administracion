@@ -110,7 +110,7 @@
                         <i class="fas fa-save"></i> Guardar Nueva Contraseña
                     </button>
                     <div class="text-center mt-3">
-                        <a href="{{ route('login') }}" class="text-decoration-none">
+                        <a href="/" class="text-decoration-none">
                             <i class="fas fa-arrow-left"></i> Volver al Login
                         </a>
                     </div>

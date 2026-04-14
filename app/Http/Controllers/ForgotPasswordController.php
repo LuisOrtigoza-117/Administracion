@@ -45,9 +45,9 @@ class ForgotPasswordController extends Controller
 
     public function showResetForm(Request $request, $token = null)
     {
-        if (!$token) {
+        if (!$token || !$request->email) {
             return redirect()->route('password.request')
-                ->with('error', 'Token de recuperación requerido.');
+                ->with('error', 'Token o email inválido.');
         }
         
         return view('auth.passwords.reset', ['token' => $token, 'email' => $request->email]);
@@ -57,8 +57,10 @@ class ForgotPasswordController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'password' => 'required|string|min:6|confirmed',
+        ], [
+            'email.exists' => 'No existe un usuario con ese correo electrónico.',
         ]);
 
         $passwordReset = DB::table('password_reset_tokens')
@@ -67,23 +69,24 @@ class ForgotPasswordController extends Controller
             ->first();
 
         if (!$passwordReset) {
-            return back()->with('error', 'Token de recuperación inválido.');
-        }
-
-        // Check if token is expired (24 hours)
-        if ($passwordReset->created_at->diffInHours(now()) > 24) {
-            return back()->with('error', 'El token ha expirado. Solicita uno nuevo.');
+            return redirect()->route('password.request')
+                ->with('error', 'El enlace de recuperación es inválido o ha sido usado. Solicita uno nuevo.');
         }
 
         $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return redirect()->route('password.request')
+                ->with('error', 'No existe un usuario con ese correo electrónico.');
+        }
+
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        // Delete the token
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return redirect()->route('login')
+        return redirect()->route('login.form')
             ->with('success', 'Contraseña actualizada correctamente. Ahora puedes iniciar sesión.');
     }
 }

@@ -15,12 +15,13 @@ class StudentDashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $student = $user->student->load('group.teacher');
+        $student = $user->student;
         
         if (!$student) {
             return redirect('/')->with('error', 'No tienes un perfil de estudiante asociado.');
         }
-
+        
+        $student->load('group.teacher');
         $studentGroupId = $student->group_id;
         
         $tasks = Task::where(function($query) use ($studentGroupId) {
@@ -91,13 +92,11 @@ class StudentDashboardController extends Controller
         }
 
         $request->validate([
-            'content' => 'required_without:file|string|nullable',
-            'file' => 'required_without:content|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,jpg,jpeg,png,gif,bmp|max:20480',
+            'content' => 'nullable|string',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar,jpg,jpeg,png,gif,bmp|max:20480',
         ], [
             'file.mimes' => 'El archivo debe ser un documento PDF, Word, Excel, PowerPoint, imagen o archivo comprimido.',
             'file.max' => 'El archivo no puede superar los 20MB.',
-            'content.required_without' => 'Debes escribir una respuesta o adjuntar un archivo.',
-            'file.required_without' => 'Debes escribir una respuesta o adjuntar un archivo.',
         ]);
 
         $existingSubmission = TaskSubmission::where('task_id', $task->id)
@@ -116,14 +115,14 @@ class StudentDashboardController extends Controller
             $filePath = $file->storeAs('submissions', $fileName, 'public');
         }
 
-        $submission = new TaskSubmission();
-        $submission->task_id = $task->id;
-        $submission->student_id = $student->id;
-        $submission->content = $request->content ?? 'Entrega de archivo';
-        $submission->file_path = $filePath;
-        $submission->status = 'submitted';
-        $submission->submitted_at = now();
-        $submission->save();
+        TaskSubmission::create([
+            'task_id' => $task->id,
+            'student_id' => $student->id,
+            'content' => $request->content ?? 'Entrega de tarea',
+            'file_path' => $filePath,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
 
         return back()->with('success', 'Tarea enviada correctamente.');
     }

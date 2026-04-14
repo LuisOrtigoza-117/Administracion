@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
 
 class Task extends Model
 {
@@ -13,17 +14,20 @@ class Task extends Model
     protected $casts = [
         'due_date' => 'date',
         'attachments' => 'array',
-        'group_ids' => 'array',
     ];
-
-    public function groups()
-    {
-        return $this->belongsToMany(Group::class, 'task_group', 'task_id', 'group_id');
-    }
 
     public function submissions(): HasMany
     {
         return $this->hasMany(TaskSubmission::class);
+    }
+
+    public function getGroupsAttribute(): Collection
+    {
+        $ids = $this->group_ids ?? [];
+        if (empty($ids)) {
+            return new Collection();
+        }
+        return Group::whereIn('id', $ids)->get();
     }
 
     public function getGroupIdsAttribute($value)
@@ -32,11 +36,5 @@ class Task extends Model
             return $value;
         }
         return $value ? json_decode($value, true) : [];
-    }
-
-    public function getGroupIdAttribute()
-    {
-        $ids = $this->group_ids;
-        return is_array($ids) && count($ids) > 0 ? $ids[0] : null;
     }
 }

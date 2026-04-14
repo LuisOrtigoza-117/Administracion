@@ -17,9 +17,12 @@
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">{{ $task->title }}</h5>
-                        @if($task->submissions->first())
-                            @if($task->submissions->first()->grade !== null)
-                                <span class="badge bg-success">Calificada: {{ $task->submissions->first()->grade }}</span>
+                        @php
+                            $mySubmission = $task->submissions->where('student_id', $student->id)->first();
+                        @endphp
+                        @if($mySubmission)
+                            @if($mySubmission->grade !== null)
+                                <span class="badge bg-success">Calificada: {{ $mySubmission->grade }}/{{ $task->max_points }}</span>
                             @else
                                 <span class="badge bg-info">Entregada</span>
                             @endif
@@ -57,30 +60,49 @@
                         
                         <div class="mb-2">
                             <strong><i class="fas fa-calendar me-1"></i> Fecha límite:</strong> 
-                            {{ $task->due_date->format('d/m/Y H:i') }}
-                        </div>
-                        <div class="mb-2">
-                            <strong><i class="fas fa-layer-group me-1"></i> Grupo:</strong> 
-                            {{ $task->group->name ?? '' }}
+                            {{ $task->due_date->format('d/m/Y') }}
                         </div>
                         
-                        @if($task->submissions->first())
+                        @if($mySubmission)
                             <div class="alert alert-secondary mt-3 mb-0">
                                 <strong>Tu entrega:</strong>
-                                <p class="mb-1">{{ $task->submissions->first()->content }}</p>
-                                @if($task->submissions->first()->file_path)
+                                @if($mySubmission->content)
+                                    <p class="mb-1">{{ $mySubmission->content }}</p>
+                                @endif
+                                @if($mySubmission->file_path)
+                                    @php
+                                        $fileUrl = asset('storage/' . $mySubmission->file_path);
+                                        $fileExtension = strtolower(pathinfo($mySubmission->file_path, PATHINFO_EXTENSION));
+                                        $isImage = in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
+                                        $isPdf = $fileExtension === 'pdf';
+                                    @endphp
                                     <div class="mt-2">
                                         <strong>Archivo adjuntado:</strong>
-                                        <a href="{{ asset('storage/' . $task->submissions->first()->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
-                                            <i class="fas fa-file-download"></i> Descargar archivo
-                                        </a>
+                                        <div class="mt-2">
+                                            @if($isImage)
+                                                <div class="text-center mb-2">
+                                                    <img src="{{ $fileUrl }}" alt="Archivo entregado" class="img-fluid rounded" style="max-height: 200px; cursor: pointer;" onclick="window.open('{{ $fileUrl }}', '_blank')">
+                                                    <p class="text-muted small mb-0">Clic en la imagen para ver en grande</p>
+                                                </div>
+                                            @elseif($isPdf)
+                                                <iframe src="{{ $fileUrl }}" width="100%" height="200px" class="rounded border"></iframe>
+                                            @endif
+                                            <div class="mt-2">
+                                                <a href="{{ $fileUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Ver archivo completo
+                                                </a>
+                                                <a href="{{ $fileUrl }}" download class="btn btn-sm btn-success ms-1">
+                                                    <i class="fas fa-download"></i> Descargar
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
-                                @if($task->submissions->first()->grade !== null)
+                                @if($mySubmission->grade !== null)
                                     <hr>
-                                    <strong>Calificación: {{ $task->submissions->first()->grade }}</strong>
-                                    @if($task->submissions->first()->feedback)
-                                        <p class="mb-0 mt-2"><strong>Feedback:</strong> {{ $task->submissions->first()->feedback }}</p>
+                                    <strong>Calificación: {{ $mySubmission->grade }}/{{ $task->max_points }}</strong>
+                                    @if($mySubmission->feedback)
+                                        <p class="mb-0 mt-2"><strong>Feedback:</strong> {{ $mySubmission->feedback }}</p>
                                     @endif
                                 @endif
                             </div>
@@ -95,7 +117,7 @@
                                     <div class="mb-2">
                                         <label class="form-label">O adjuntar archivo:</label>
                                         <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.bmp">
-                                        <small class="text-muted">PDF, Word, Excel, PowerPoint, imágenes o compressed (máx 20MB)</small>
+                                        <small class="text-muted">PDF, Word, Excel, PowerPoint, imágenes o comprimido (máx 20MB)</small>
                                     </div>
                                     <button type="submit" class="btn btn-student">
                                         <i class="fas fa-upload me-1"></i> Entregar

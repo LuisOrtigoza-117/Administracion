@@ -53,13 +53,13 @@ class ProfileController extends Controller
         if ($user->isStudent() && $user->student) {
             $studentData = [];
             
-            if ($request->has('lastname')) {
+            if ($request->lastname !== null && $request->lastname !== '') {
                 $studentData['lastname'] = $request->lastname;
             }
-            if ($request->has('student_number')) {
+            if ($request->student_number !== null && $request->student_number !== '') {
                 $studentData['student_number'] = $request->student_number;
             }
-            if ($request->has('phone')) {
+            if ($request->phone !== null && $request->phone !== '') {
                 $studentData['phone'] = $request->phone;
             }
             
